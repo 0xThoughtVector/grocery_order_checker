@@ -7,7 +7,7 @@ We'll parse the textual response to get item names.
 import base64
 import httpx
 import google.generativeai as genai
-from .config import Config
+from config import Config
 
 # Initialize the Gemini model on import
 genai.configure(api_key=Config.GEMINI_API_KEY)
@@ -17,35 +17,31 @@ def analyze_image_for_items(image_bytes: bytes) -> str:
     Calls the Gemini model with the given image, asking for a *list* of items 
     recognized in the image (text). Returns the raw text from the model.
     """
-
     # Prepare image as base64
     encoded_image = base64.b64encode(image_bytes).decode('utf-8')
 
     # Make a prompt that tries to get a clean list of items
-    # e.g.: "List all grocery items you see in the image. Use bullet points."
     prompt_text = (
         "List all grocery items you see in the image. "
         "If you see multiple of the same item, mention it multiple times or "
         "indicate the count. Use bullet points or lines so it's easier to parse."
     )
 
-    # Make the request
-    # We pass an array of: [ { mime_type, data }, prompt_text ]
-    # According to the gemini doc, the model can handle that structure.
-    response = genai.generate_content(
-        [
+    # Make the request using the new API
+    model = genai.GenerativeModel('gemini-exp-1206')  # Keep your original model name
+    response = model.generate_content(
+        contents=[
             {
-                "mime_type": "image/jpeg",  # or image/png if needed
-                "data": encoded_image
-            },
-            prompt_text
-        ],
-        model="gemini-exp-1206"
+                "parts": [
+                    {"mime_type": "image/jpeg", "data": encoded_image},
+                    {"text": prompt_text}
+                ]
+            }
+        ]
     )
 
-    # The response is an object that has .content (the model text)
-    # For production, add error handling, etc.
-    return response.content
+    # Return the response text
+    return response.text
 
 def parse_gemini_response_into_items(text_response: str) -> dict:
     """

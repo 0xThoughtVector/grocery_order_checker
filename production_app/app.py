@@ -5,10 +5,10 @@ Main Flask app for production:
 
 import io
 from flask import Flask, request, jsonify
-from .config import Config
-from .db import get_order_by_id
-from .gemini_api import analyze_image_for_items, parse_gemini_response_into_items
-from .utils import compare_order
+from config import Config
+from db import get_order_by_id
+from gemini_api import analyze_image_for_items, parse_gemini_response_into_items
+from utils import compare_order
 
 app = Flask(__name__)
 app.config.from_object(Config)
