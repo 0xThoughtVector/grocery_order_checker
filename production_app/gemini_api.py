@@ -5,7 +5,6 @@ We'll parse the textual response to get item names.
 """
 
 import base64
-import httpx
 import google.generativeai as genai
 from config import Config
 
